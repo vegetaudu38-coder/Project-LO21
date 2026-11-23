@@ -1,23 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <math.h>
-
-#define longIndiv 8
-#define A (-1.0)
-#define B (1.0)
-
-typedef unsigned char Bit;
-
-typedef struct Cellule {
-    Bit bit;
-    struct Cellule *suivant;
-} Cellule;
-
-typedef Cellule *Individu;   /* liste chaînée de bits */
+#include "individu.h"
 
 /* ---------- Outils ---------- */
 
+/* Ajoute un bit en tête de liste et renvoie la nouvelle tête */
 Individu ajouterEnTete(Individu ind, Bit b)
 {
     Cellule *c = (Cellule *)malloc(sizeof(Cellule));
@@ -30,6 +15,7 @@ Individu ajouterEnTete(Individu ind, Bit b)
     return c;
 }
 
+/* Libère toutes les cellules de l'individu */
 void libererIndividu(Individu ind)
 {
     Cellule *tmp;
@@ -40,6 +26,7 @@ void libererIndividu(Individu ind)
     }
 }
 
+/* Affiche les bits de gauche à droite */
 void afficherIndividu(Individu ind)
 {
     for (; ind != NULL; ind = ind->suivant)
@@ -69,6 +56,7 @@ Individu initRec(int n)
 
 /* ---------- Décodage ---------- */
 
+/* Convertit la liste de bits (bit de poids fort en tête) en entier */
 int decoder(Individu ind)
 {
     int valeur = 0;
@@ -79,6 +67,7 @@ int decoder(Individu ind)
 
 /* ---------- Croisement ---------- */
 
+/* Pour chaque position, échange les bits des deux individus avec la probabilité pCroise */
 void croiser(Individu ind1, Individu ind2, double pCroise)
 {
     Bit tmp;
@@ -97,39 +86,14 @@ void croiser(Individu ind1, Individu ind2, double pCroise)
 
 /* ---------- Qualité ---------- */
 
+/* Mise à l'échelle de x dans [A, B], puis calcul de la qualité */
 double qualite(Individu ind)
 {
     int x = decoder(ind);
     double X = ((double)x / pow(2.0, longIndiv)) * (B - A) + A;
-    return -X * X;
-}
-
-/* ---------- Programme de test ---------- */
-
-int main(void)
-{
-    Individu i1, i2;
-    double pCroise = 0.5;
-
-    srand((unsigned int)time(NULL));
-
-    i1 = initIter(longIndiv);
-    i2 = initRec(longIndiv);
-
-    printf("Individu 1 : "); afficherIndividu(i1);
-    printf("Individu 2 : "); afficherIndividu(i2);
-    printf("Valeur 1 = %d, qualite 1 = %f\n", decoder(i1), qualite(i1));
-    printf("Valeur 2 = %d, qualite 2 = %f\n", decoder(i2), qualite(i2));
-
-    croiser(i1, i2, pCroise);
-
-    printf("\nApres croisement (pCroise = %.2f) :\n", pCroise);
-    printf("Individu 1 : "); afficherIndividu(i1);
-    printf("Individu 2 : "); afficherIndividu(i2);
-    printf("Valeur 1 = %d, qualite 1 = %f\n", decoder(i1), qualite(i1));
-    printf("Valeur 2 = %d, qualite 2 = %f\n", decoder(i2), qualite(i2));
-
-    libererIndividu(i1);
-    libererIndividu(i2);
-    return 0;
+#ifdef FONCTION_F2
+    return -log(X);     /* f2(x) = -ln(X) */
+#else
+    return -X * X;      /* f1(x) = -X^2 */
+#endif
 }

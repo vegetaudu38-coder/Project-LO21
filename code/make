@@ -1,0 +1,29 @@
+CC = gcc
+CFLAGS = -Wall -Wextra -std=c99
+LDFLAGS = -lm
+SRC = main.c individu.c Population.c
+HDR = individu.h Population.h
+
+# Détection de Windows pour l'extension .exe et la commande de suppression
+ifeq ($(OS),Windows_NT)
+EXT = .exe
+RM = del /Q
+else
+EXT =
+RM = rm -f
+endif
+
+# Fonction f1 (par défaut)
+all: projet$(EXT)
+
+projet$(EXT): $(SRC) $(HDR)
+	$(CC) $(CFLAGS) -o projet$(EXT) $(SRC) $(LDFLAGS)
+
+# Fonction f2
+f2: $(SRC) $(HDR)
+	$(CC) $(CFLAGS) -DFONCTION_F2 -o projet_f2$(EXT) $(SRC) $(LDFLAGS)
+
+clean:
+	-$(RM) projet$(EXT) projet_f2$(EXT)
+
+.PHONY: all f2 clean
